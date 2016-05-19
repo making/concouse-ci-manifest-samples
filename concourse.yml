@@ -1,0 +1,89 @@
+---
+name: concourse
+
+director_uuid: <%= `bosh status --uuid` %>
+
+releases:
+- name: concourse
+  version: latest
+- name: garden-linux
+  version: latest
+
+stemcells:
+- alias: trusty
+  os: ubuntu-trusty
+  version: latest
+
+instance_groups:
+- name: web
+  instances: 1
+  vm_type: web
+  stemcell: trusty
+  azs: [z1]
+  networks:
+  - name: public
+    default: [dns, gateway]
+  - name: web
+    static_ips: [xxx.xxx.xxx.xxx] # EIP for web (TODO Change me!!)
+  jobs:
+  - name: atc
+    release: concourse
+    properties:
+      # replace with your CI's externally reachable URL, e.g. https://ci.foo.com
+      external_url: http://xxx.xxx.xxx.xxx:8080 #  (TODO Change me!!)
+
+      # replace with username/password, or configure GitHub auth
+      basic_auth_username: concourse
+      basic_auth_password: password
+
+      postgresql_database: &atc_db atc
+
+      # Allow viewing of pipelines as an anonymous user if the job is configured with `public: true`
+      publicly_viewable: true
+  - name: tsa
+    release: concourse
+    properties: {}
+
+- name: db
+  instances: 1
+  vm_type: database
+  stemcell: trusty
+  persistent_disk_type: database
+  azs: [z1]
+  networks: [{name: private}]
+  jobs:
+  - name: postgresql
+    release: concourse
+    properties:
+      databases:
+      - name: *atc_db
+        # make up a role and password
+        role: REPLACE_ME
+        password: REPLACE_ME
+
+- name: worker
+  instances: 1
+  vm_type: worker
+  stemcell: trusty
+  azs: [z1]
+  networks: [{name: private}]
+  jobs:
+  - name: groundcrew
+    release: concourse
+    properties: {}
+  - name: baggageclaim
+    release: concourse
+    properties: {}
+  - name: garden
+    release: garden-linux
+    properties:
+      garden:
+        listen_network: tcp
+        listen_address: 0.0.0.0:7777
+
+update:
+  canaries: 1
+  max_in_flight: 1
+  serial: false
+  canary_watch_time: 1000-60000
+  update_watch_time: 1000-60000

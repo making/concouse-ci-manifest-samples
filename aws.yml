@@ -1,0 +1,56 @@
+azs:
+- name: z1
+  cloud_properties: {availability_zone: ap-northeast-1a}
+- name: z2 # 使わないけど一応
+  cloud_properties: {availability_zone: ap-northeast-1c}
+
+vm_types:
+- name: web
+  cloud_properties:
+    instance_type: t2.micro
+    ephemeral_disk: {size: 3000, type: gp2}
+    security_groups: [web, bosh]
+- name: database
+  cloud_properties:
+    instance_type: t2.micro
+    ephemeral_disk: {size: 3000, type: gp2}
+- name: worker
+  cloud_properties:
+    instance_type: m3.medium
+    ephemeral_disk: {size: 30000, type: gp2}
+- name: compilation
+  cloud_properties:
+    instance_type: m3.medium
+    ephemeral_disk: {size: 30000, type: gp2}
+
+disk_types:
+- name: database
+  disk_size: 50_000
+  cloud_properties: {type: gp2}
+
+networks:
+- name: web
+  type: vip
+- name: public
+  type: manual
+  subnets:
+  - range: 10.0.0.0/16
+    gateway: 10.0.0.1
+    az: z1
+    reserved: [10.0.0.2-10.0.0.10,10.0.0.142] # 142 is for NAT (TODO Change me!!)
+    cloud_properties: {subnet: subnet-32121b45} # public (TODO Change me!!)
+- name: private
+  type: manual
+  subnets:
+  - range: 10.0.1.0/24
+    gateway: 10.0.1.1
+    az: z1
+    reserved: [10.0.1.2-10.0.1.10]
+    cloud_properties: {subnet: subnet-33121b44} # private (TODO Change me!!)
+
+compilation:
+  workers: 8
+  reuse_compilation_vms: true
+  az: z1
+  vm_type: compilation
+  network: public

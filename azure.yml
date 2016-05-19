@@ -1,0 +1,60 @@
+azs:
+- name: z1 # dummy
+- name: z2 # dummy
+
+vm_types:
+- name: web
+  cloud_properties:
+    instance_type: Basic_A1
+- name: database
+  cloud_properties:
+    instance_type: Basic_A1
+- name: worker
+  cloud_properties:
+    instance_type: Standard_D1
+- name: compilation
+  cloud_properties:
+    instance_type: Standard_D1
+
+disk_types:
+- name: database
+  disk_size: 50_000
+
+networks:
+- name: web
+  type: vip
+  cloud_properties:
+    tcp_endpoints:
+    - "80:80"
+    - "443:443"
+    - "8080:8080"
+    - "22:22"
+- name: public
+  type: manual
+  subnets:
+  - range: 10.0.16.0/20
+    dns: [168.63.129.16]
+    gateway: 10.0.16.1
+    azs: [z1]
+    reserved: [10.0.16.2-10.0.16.10]
+    cloud_properties:
+      virtual_network_name: boshvnet-crp
+      subnet_name: CloudFoundry
+- name: private # dummy
+  type: manual
+  subnets:
+  - range: 10.0.16.0/20
+    dns: [168.63.129.16]
+    gateway: 10.0.16.1
+    azs: [z1]
+    reserved: [10.0.16.2-10.0.16.10]
+    cloud_properties:
+      virtual_network_name: boshvnet-crp
+      subnet_name: CloudFoundry
+
+compilation:
+  workers: 8
+  reuse_compilation_vms: true
+  az: z1
+  vm_type: compilation
+  network: public
