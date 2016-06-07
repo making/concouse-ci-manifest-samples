@@ -1,0 +1,62 @@
+azs:
+- name: z1
+- name: z2
+
+vm_types:
+- name: web
+  cloud_properties:
+    cpu: 1
+    ram: 2048
+    disk: 30_240
+- name: database
+  cloud_properties:
+    cpu: 1
+    ram: 2048
+    disk: 30_240
+- name: worker
+  cloud_properties:
+    cpu: 2
+    ram: 4096
+    disk: 30_240
+- name: compilation
+  cloud_properties:
+    cpu: 2
+    ram: 4096
+    disk: 30_240
+
+disk_types:
+- name: database
+  disk_size: 50_000
+
+networks:
+- name: web
+  type: vip
+  cloud_properties:
+    name: "VM Network"
+- name: public
+  type: manual
+  subnets:
+  - range: 192.168.0.0/24
+    dns: [192.168.0.15]
+    gateway: 192.168.0.1
+    azs: [z1]
+    reserved: [192.168.0.1-192.168.0.200,192.168.0.220]
+    cloud_properties:
+      name: "VM Network"
+- name: private # dummy
+  type: manual
+  subnets:
+  - range: 192.168.0.0/24
+    dns: [192.168.0.15]
+    gateway: 192.168.0.1
+    azs: [z1]
+    reserved: [192.168.0.1-192.168.0.200,192.168.0.220]
+    cloud_properties:
+      name: "VM Network"
+
+compilation:
+  workers: 8
+  reuse_compilation_vms: true
+  az: z1
+  vm_type: compilation
+  network: public
