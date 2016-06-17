@@ -23,14 +23,14 @@ instance_groups:
   networks:
   - name: public
     default: [dns, gateway]
-  - name: web
-    static_ips: [xxx.xxx.xxx.xxx] # EIP for web (TODO Change me!!)
+  #- name: web
+    #static_ips: [xxx.xxx.xxx.xxx] # EIP for web (TODO Change me!!)
   jobs:
   - name: atc
     release: concourse
     properties:
       # replace with your CI's externally reachable URL, e.g. https://ci.foo.com
-      external_url: http://xxx.xxx.xxx.xxx:8080 #  (TODO Change me!!)
+      external_url: http://192.168.0.201:8080 #  (TODO Change me!!)
 
       # replace with username/password, or configure GitHub auth
       basic_auth_username: concourse
